@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Мои расходы</h1>
+
+<div class="stats">
+    <p>Всего потрачено: <b>{{ "%.2f"|format(total) }} руб.</b></p>
+    <p>Записей: <b>{{ expenses|length }}</b></p>
+</div>
+
+{% if categories %}
+<div class="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script>
+    const categories = {{ categories|tojson }};
+    const ctx = document.getElementById('myChart');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(categories),
+            datasets: [{
+                data: Object.values(categories),
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40']
+            }]
+        }
+    });
+</script>
+{% endif %}
+
+<h2>История</h2>
+<table>
+    <tr><th>Дата</th><th>Сумма</th><th>Категория</th><th>Коммент</th><th></th></tr>
+    {% for e in expenses %}
+    <tr>
+        <td>{{ e.date.strftime("%d.%m.%Y") }}</td>
+        <td>{{ "%.2f"|format(e.amount) }} ₽</td>
+        <td>{{ e.category }}</td>
+        <td>{{ e.comment }}</td>
+        <td><a href="/delete/{{ e.id }}" class="del">✕</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not expenses %}
+    <p style="margin-top:20px;">Пока пусто. <a href="/add">Добавь первую трату!</a></p>
+{% endif %}
+{% endblock %}
